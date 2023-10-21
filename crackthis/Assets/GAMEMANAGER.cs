@@ -396,6 +396,52 @@ public class GAMEMANAGER : MonoBehaviour
         return decryptedText;
     }
 
+    public string yagizmethod(string text)
+    {
+        int textLength = text.Length;
+
+        int sameLetterCount = 0;
+
+        string result = "";
+
+        for(int i = 0; i < textLength; i++)
+        {
+            for(int z = 0; z < textLength; z++)
+            {
+                if(text[i] == text[z])
+                {
+                    sameLetterCount++;
+                    break;
+                }
+            }
+        }
+
+        int norm = sameLetterCount + textLength;
+
+        string bytes = stringToByteText(text, 1);
+
+        string[] args = bytes.Split();
+
+        for(int k = 0; k < args.Length-1; k++)
+        {
+            Debug.Log(args[k]);
+
+            int y = int.Parse(args[k]) % alphabetLower.Length;
+
+            int yy = (2 ^ (2 * norm + y)) + 1;
+
+            int final = yy % alphabetLower.Length;
+
+            result += alphabetLower[final];
+
+            norm = final;
+
+        }
+
+        return result;
+    }
+        
+
     public void VigenereEncryptVoid(string key)
     {
         text = "";

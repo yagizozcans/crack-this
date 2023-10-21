@@ -14,6 +14,7 @@ public class TerminalManager : MonoBehaviour
     public ScrollRect sr;
     public GameObject msgList;
 
+
     Interpreter interpreter;
 
     private void Start()

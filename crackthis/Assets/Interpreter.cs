@@ -124,100 +124,112 @@ public class Interpreter : MonoBehaviour
             response.Add("Stored text cleared.");
             return response;
         }
-        else if (args[0] == "atbash" && args.Length == 2)
+        if(gamemanager.textThatWannaCrypted != "")
         {
-            if (args[1] == "-e")
+            if(args[0] == "yagiz")
             {
                 string text = gamemanager.textThatWannaCrypted;
-                gamemanager.AtbashEncryptVoid();
-                response.Add($"{text} {ColorString("encrypted with atbash", "green")} -> {gamemanager.textThatWannaCrypted}");
+                gamemanager.textThatWannaCrypted = gamemanager.yagizmethod(text);
+                response.Add($"{text} {ColorString("encrypted with yagiz", "green")} -> {gamemanager.textThatWannaCrypted}");
+                return response;
             }
-            else if (args[1] == "-d")
+            else if (args[0] == "atbash" && args.Length == 2)
             {
-                string text = gamemanager.textThatWannaCrypted;
-                gamemanager.AtbashEncryptVoid();
-                response.Add($"{text} {ColorString("decrypted with atbash", "green")} -> {gamemanager.textThatWannaCrypted}");
+                if (args[1] == "-e")
+                {
+                    string text = gamemanager.textThatWannaCrypted;
+                    gamemanager.AtbashEncryptVoid();
+                    response.Add($"{text} {ColorString("encrypted with atbash", "green")} -> {gamemanager.textThatWannaCrypted}");
+                }
+                else if (args[1] == "-d")
+                {
+                    string text = gamemanager.textThatWannaCrypted;
+                    gamemanager.AtbashEncryptVoid();
+                    response.Add($"{text} {ColorString("decrypted with atbash", "green")} -> {gamemanager.textThatWannaCrypted}");
+                }
+                else
+                {
+                    response.Add("Command not recognized. Type help for a list of commands.");
+                }
+                return response;
             }
-            else
+            else if (args[0] == "caesar")
             {
-                response.Add("Command not recognized. Type help for a list of commands.");
+                if (args.Length > 2)
+                {
+                    if (int.TryParse(args[2], out int a) && args.Length == 3)
+                    {
+                        if (args[1] == "-e")
+                        {
+                            string text = gamemanager.textThatWannaCrypted;
+                            gamemanager.CaesarEncryptVoid(a);
+                            response.Add($"{text} {ColorString("encrypted with caesar", "green")} -> {gamemanager.textThatWannaCrypted}");
+                        }
+                        else if (args[1] == "-d")
+                        {
+                            string text = gamemanager.textThatWannaCrypted;
+                            gamemanager.CaesarDecryptVoid(a);
+                            response.Add($"{text} {ColorString("decrypted with caesar", "green")} -> {gamemanager.textThatWannaCrypted}");
+                        }
+                    }
+                }
+                return response;
             }
-            return response;
-        }
-        else if (args[0] == "caesar")
-        {
-            if (args.Length > 2)
+            else if (args[0] == "vigenere")
             {
-                if (int.TryParse(args[2],out int a) && args.Length == 3)
+                if (args.Length > 2)
+                {
+                    if (args[1] == "-e")
+                    {
+                        if (args[2].All(char.IsLetter))
+                        {
+                            string text = gamemanager.textThatWannaCrypted;
+                            gamemanager.VigenereEncryptVoid(args[2]);
+                            response.Add($"{text} {ColorString("encrypted with vigenere", "green")} -> {gamemanager.textThatWannaCrypted}");
+                        }
+                    }
+                    else if (args[1] == "-d")
+                    {
+                        if (args[2].All(char.IsLetter))
+                        {
+                            string text = gamemanager.textThatWannaCrypted;
+                            gamemanager.VigenereDecryptVoid(args[2]);
+                            response.Add($"{text} {ColorString("encrypted with vigenere", "green")} -> {gamemanager.textThatWannaCrypted}");
+                        }
+                    }
+                }
+                return response;
+            }
+            else if (args[0] == "rsi")
+            {
+                if (args.Length == 5)
+                {
+                    if (BigInteger.TryParse(args[2], out BigInteger a) && BigInteger.TryParse(args[3], out BigInteger b) && BigInteger.TryParse(args[4], out BigInteger e))
+                    {
+                        gamemanager.CreatePublicKey(a, b, e);
+                        response.Add("Public key created.");
+                    }
+
+                }
+                else if (args.Length == 2)
                 {
                     if (args[1] == "-e")
                     {
                         string text = gamemanager.textThatWannaCrypted;
-                        gamemanager.CaesarEncryptVoid(a);
-                        response.Add($"{text} {ColorString("encrypted with caesar", "green")} -> {gamemanager.textThatWannaCrypted}");
+                        string cipherText = gamemanager.EncryptTextWithPublicKey(gamemanager.pKey.e, gamemanager.pKey.N, text);
+                        gamemanager.textThatWannaCrypted = cipherText;
+                        response.Add($"{text} {ColorString("encrypted with rsi using public key", "green")} -> {gamemanager.textThatWannaCrypted}");
                     }
                     else if (args[1] == "-d")
                     {
                         string text = gamemanager.textThatWannaCrypted;
-                        gamemanager.CaesarDecryptVoid(a);
-                        response.Add($"{text} {ColorString("decrypted with caesar", "green")} -> {gamemanager.textThatWannaCrypted}");
+                        string cipherText = gamemanager.DecryptTextWithPrivateKey(gamemanager.pKey.e, gamemanager.pKey.N, text, gamemanager.pKey.binaryA, gamemanager.pKey.binaryB);
+                        gamemanager.textThatWannaCrypted = cipherText;
+                        response.Add($"{text} {ColorString("encrypted with rsi using public key", "green")} -> {gamemanager.textThatWannaCrypted}");
                     }
                 }
+                return response;
             }
-            return response;
-        }
-        else if (args[0] == "vigenere")
-        {
-            if (args.Length > 2)
-            {
-                if (args[1] == "-e")
-                {
-                    if (args[2].All(char.IsLetter))
-                    {
-                        string text = gamemanager.textThatWannaCrypted;
-                        gamemanager.VigenereEncryptVoid(args[2]);
-                        response.Add($"{text} {ColorString("encrypted with vigenere", "green")} -> {gamemanager.textThatWannaCrypted}");
-                    }
-                }
-                else if (args[1] == "-d")
-                {
-                    if (args[2].All(char.IsLetter))
-                    {
-                        string text = gamemanager.textThatWannaCrypted;
-                        gamemanager.VigenereDecryptVoid(args[2]);
-                        response.Add($"{text} {ColorString("encrypted with vigenere", "green")} -> {gamemanager.textThatWannaCrypted}");
-                    }
-                }
-            }
-            return response;
-        }else if(args[0] == "rsi")
-        {
-            if (args.Length == 5)
-            {
-                if (BigInteger.TryParse(args[2],out BigInteger a) && BigInteger.TryParse(args[3], out BigInteger b) && BigInteger.TryParse(args[4], out BigInteger e))
-                {
-                    gamemanager.CreatePublicKey(a, b, e);
-                    response.Add("Public key created.");
-                }
-
-            }else if(args.Length == 2)
-            {
-                if (args[1] == "-e")
-                {
-                    string text = gamemanager.textThatWannaCrypted;
-                    string cipherText = gamemanager.EncryptTextWithPublicKey(gamemanager.pKey.e, gamemanager.pKey.N, text);
-                    gamemanager.textThatWannaCrypted = cipherText;
-                    response.Add($"{text} {ColorString("encrypted with rsi using public key", "green")} -> {gamemanager.textThatWannaCrypted}");
-                }
-                else if (args[1] == "-d")
-                {
-                    string text = gamemanager.textThatWannaCrypted;
-                    string cipherText = gamemanager.DecryptTextWithPrivateKey(gamemanager.pKey.e, gamemanager.pKey.N, text, gamemanager.pKey.binaryA,gamemanager.pKey.binaryB);
-                    gamemanager.textThatWannaCrypted = cipherText;
-                    response.Add($"{text} {ColorString("encrypted with rsi using public key", "green")} -> {gamemanager.textThatWannaCrypted}");
-                }
-            }
-            return response;
         }
         else
         {
